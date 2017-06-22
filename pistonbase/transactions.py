@@ -12,8 +12,8 @@ from .signedtransactions import Signed_Transaction as GrapheneSigned_Transaction
 # Import all operations so they can be loaded from this module
 from .operations import (
     Operation, Permission, Memo, Vote, Comment, Amount,
-    Exchange_rate, Witness_props, Account_create, Account_update,
-    Transfer, Transfer_to_vesting, Withdraw_vesting, Limit_order_create,
+    Exchange_rate, Witness_props, Account_create, Account_create_with_delegation,
+    Account_update, Transfer, Transfer_to_vesting, Withdraw_vesting, Limit_order_create,
     Limit_order_cancel, Set_withdraw_vesting_route, Convert, Feed_publish,
     Witness_update, Transfer_to_savings, Transfer_from_savings,
     Cancel_transfer_from_savings, Account_witness_vote, Custom_json,
@@ -50,8 +50,12 @@ def getBlockParams(ws):
         witness node!
     """
     dynBCParams = ws.get_dynamic_global_properties()
-    ref_block_num = dynBCParams["head_block_number"] & 0xFFFF
-    ref_block_prefix = struct.unpack_from("<I", unhexlify(dynBCParams["head_block_id"]), 4)[0]
+    ref_block_num = dynBCParams["head_block_number"] - 3 & 0xFFFF
+    ref_block = ws.get_block(dynBCParams["head_block_number"] - 2)
+    ref_block_prefix = struct.unpack_from("<I", unhexlify(ref_block["previous"]), 4)[0]
+
+    #ref_block_num = dynBCParams["head_block_number"] & 0xFFFF
+    #ref_block_prefix = struct.unpack_from("<I", unhexlify(dynBCParams["head_block_id"]), 4)[0]
     return ref_block_num, ref_block_prefix
 
 
